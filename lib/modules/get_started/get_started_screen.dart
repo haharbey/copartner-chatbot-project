@@ -82,7 +82,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
     final bool useEnglish = languageProvider.isEnglish;
 
     final title = useEnglish
-        ? "Welcome Mother Fucker"
+        ? "Welcome"
         : "Maligayang Pagdating";
     final description = useEnglish
         ? "Your reliable companion for answering all of your concerns. Let's get you started!"
