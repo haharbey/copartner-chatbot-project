@@ -19,10 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = <Widget>[
     const HomeContent(),
-    const ChatScreen(), 
+    const ChatScreen(),
     const ProfileScreen(),
-    const NotificationScreen()
-    
+    const NotificationScreen(),
   ];
 
   @override
@@ -37,14 +36,53 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isEnglish = context.watch<LanguageProvider>().isEnglish;
-
-    return Scaffold(
-      appBar: AppBar(
+  /// Conditionally build the AppBar based on _selectedIndex
+  AppBar _buildAppBar(BuildContext context) {
+    // If on the Chat tab (_selectedIndex == 1):
+    if (_selectedIndex == 1) {
+      return AppBar(
         automaticallyImplyLeading: false,
-        centerTitle: false, 
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Return to Home tab
+            setState(() {
+              _selectedIndex = 0;
+            });
+          },
+        ),
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: "CO",
+                style: TextStyle(
+                  fontSize: 30,
+                  fontFamily: 'Alumni Sans',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade900,
+                ),
+              ),
+              TextSpan(
+                text: "PARTNER",
+                style: TextStyle(
+                  fontSize: 30,
+                  fontFamily: 'Alumni Sans',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // No notification or settings icons in Chat
+        actions: const [],
+      );
+    } else {
+      // For all other tabs, show the normal AppBar with notification & settings
+      return AppBar(
+        automaticallyImplyLeading: false,
         elevation: 0,
         title: RichText(
           text: TextSpan(
@@ -70,8 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-
-        
         actions: [
           // Notification button
           IconButton(
@@ -79,11 +115,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const NotificationScreen()),
               );
             },
           ),
-          
           // Settings button
           IconButton(
             icon: const Icon(Icons.settings),
@@ -95,32 +131,44 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ],
-      ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEnglish = context.watch<LanguageProvider>().isEnglish;
+
+    return Scaffold(
+      appBar: _buildAppBar(context),
       body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
-            label: isEnglish ? "Home" : "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.chat),
+      // Hide the BottomNavigationBar if we're on the Chat tab
+      bottomNavigationBar: _selectedIndex == 1
+          ? null
+          : BottomNavigationBar(
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              items: [
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.home),
+                  label: isEnglish ? "Home" : "Home",
+                ),
+                BottomNavigationBarItem(
+                  icon: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.chat),
+                  ),
+                  label: isEnglish ? "Chat" : "Chat",
+                ),
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.person),
+                  label: isEnglish ? "Profile" : "Profile",
+                ),
+              ],
             ),
-            label: isEnglish ? "Chat" : "Chat",
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person),
-            label: isEnglish ? "Profile" : "Profile",
-          ),
-        ],
-      ),
     );
   }
 }
@@ -136,7 +184,7 @@ class HomeContent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/images/splash.gif',
+            'assets/images/welcome.gif',
             width: 350,
             height: 350,
           ),
@@ -164,13 +212,21 @@ class HomeContent extends StatelessWidget {
           const SizedBox(height: 80),
           Text(
             isEnglish ? "How can I help you?" : "Paano kita matutulungan?",
-            style: const TextStyle(fontSize: 23, fontFamily: 'Alumni Sans', fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 23,
+              fontFamily: 'Alumni Sans',
+              fontWeight: FontWeight.w700,
+            ),
           ),
           Text(
             isEnglish
                 ? "Start chatting with CoPartner!"
                 : "Simulan na ang usapan kay CoPartner!",
-            style: TextStyle(fontSize: 16, fontFamily: 'Alumni Sans', color: Colors.grey.shade700),
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: 'Alumni Sans',
+              color: Colors.grey.shade700,
+            ),
           ),
         ],
       ),
