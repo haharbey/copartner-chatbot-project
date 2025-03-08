@@ -160,6 +160,7 @@ class _ChatScreenState extends State<ChatScreen> {
           'sender': 'COPARTNER',
           'message': greetingText,
           'time': DateTime.now(),
+          'showTime': false,
         });
       });
       _scrollToBottom();
@@ -187,6 +188,7 @@ class _ChatScreenState extends State<ChatScreen> {
         'type': 'category',
         'active': true,
         'time': DateTime.now(),
+        'showTime': false,
       });
     });
     _scrollToBottom();
@@ -209,6 +211,7 @@ class _ChatScreenState extends State<ChatScreen> {
         'sender': 'User',
         'message': category,
         'time': DateTime.now(),
+        'showTime': false,
       });
     });
     _scrollToBottom();
@@ -225,6 +228,7 @@ class _ChatScreenState extends State<ChatScreen> {
           'type': 'subCategory',
           'active': true,
           'time': DateTime.now(),
+          'showTime': false,
         });
       });
       _scrollToBottom();
@@ -246,6 +250,7 @@ class _ChatScreenState extends State<ChatScreen> {
         'sender': 'User',
         'message': issue,
         'time': DateTime.now(),
+        'showTime': false,
       });
     });
     _scrollToBottom();
@@ -260,6 +265,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ? "Solution not found. Please contact support."
                   : "Walang nakitang solusyon. Makipag-ugnayan sa support."),
           'time': DateTime.now(),
+          'showTime': false,
         });
       });
       _scrollToBottom();
@@ -274,7 +280,10 @@ class _ChatScreenState extends State<ChatScreen> {
             'sender': 'COPARTNER',
             'message': helpfulPrompt,
             'options': ["Yes ✅", "No ❌"],
+            'type': 'feedback',
+            'active': true,
             'time': DateTime.now(),
+            'showTime': false,
           });
         });
         _scrollToBottom();
@@ -283,11 +292,20 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _handleFeedback(String feedback) {
+    for (int i = _messages.length - 1; i >= 0; i--) {
+      var msg = _messages[i];
+      if (msg['type'] == 'feedback' && msg['active'] == true) {
+        msg['active'] = false;
+        msg['selectedOption'] = feedback;
+        break;
+      }
+    }
     setState(() {
       _messages.add({
         'sender': 'User',
         'message': feedback,
         'time': DateTime.now(),
+        'showTime': false,
       });
     });
     _scrollToBottom();
@@ -306,6 +324,7 @@ class _ChatScreenState extends State<ChatScreen> {
             'sender': 'COPARTNER',
             'message': successText,
             'time': DateTime.now(),
+            'showTime': false,
           });
           Future.delayed(const Duration(seconds: 2), () {
             if (!mounted) return;
@@ -316,6 +335,7 @@ class _ChatScreenState extends State<ChatScreen> {
             'sender': 'COPARTNER',
             'message': contactSupportText,
             'time': DateTime.now(),
+            'showTime': false,
           });
         }
       });
@@ -362,12 +382,12 @@ class _ChatScreenState extends State<ChatScreen> {
           'sender': 'User',
           'message': text,
           'time': DateTime.now(),
+          'showTime': false,
         });
         _textController.clear();
       });
       _scrollToBottom();
 
-      // After a short delay, get the rule-based answer and add it as bot message.
       Future.delayed(const Duration(seconds: 1), () {
         if (!mounted) return;
         final answer = _getAnswer(text);
@@ -376,6 +396,7 @@ class _ChatScreenState extends State<ChatScreen> {
             'sender': 'COPARTNER',
             'message': answer,
             'time': DateTime.now(),
+            'showTime': false,
           });
         });
         _scrollToBottom();
@@ -385,9 +406,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userBubbleColor =
-        Theme.of(context).colorScheme.primary.withOpacity(0.2);
-    final botBubbleColor = Theme.of(context).colorScheme.surfaceVariant;
+    final userBubbleColor = const Color(0xFFCCF3FC);
+    final botBubbleColor = const Color(0xFFF6F6F6);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -399,209 +419,376 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: _messages.length,
-                  itemBuilder: (context, index) {
-                    final message = _messages[index];
-                    final isUser = message['sender'] == 'User';
+        child: DefaultTextStyle(
+          style: const TextStyle(
+              fontFamily: "Roboto", fontSize: 18, color: Colors.black),
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      final message = _messages[index];
+                      final isUser = message['sender'] == 'User';
+                      bool showTime = message['showTime'] ?? false;
 
-                    final messageWidget = Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4.0),
-                      padding: const EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: isUser ? userBubbleColor : botBubbleColor,
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Text(message['message']!),
-                    );
-
-                    final timestampWidget = Text(
-                      _formatTimestamp(message['time']),
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    );
-
-                    Widget? optionsWidget;
-                    if (message.containsKey('options')) {
-                      if (message['type'] == 'category') {
-                        final isActive = message['active'] == true;
-                        final options =
-                            (message['options'] as List).cast<String>();
-                        if (isActive) {
-                          optionsWidget = Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: options.map((option) {
-                              return OutlinedButton(
-                                onPressed: () {
-                                  _handleCategorySelection(option);
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(
-                                    color: Colors.grey.shade800,
-                                  ),
-                                ),
-                                child:
-                                    Text(option, textAlign: TextAlign.center),
-                              );
-                            }).toList(),
-                          );
-                        } else {
-                          final selectedOption =
-                              message['selectedOption'] ?? "";
-                          optionsWidget = Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: options.map((option) {
-                              if (option == selectedOption) {
-                                return ElevatedButton(
-                                  onPressed: null,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2F3296),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child:
-                                      Text(option, textAlign: TextAlign.center),
-                                );
-                              } else {
-                                return OutlinedButton(
-                                  onPressed: null,
-                                  style: OutlinedButton.styleFrom(
-                                    side: BorderSide(
-                                      color: Colors.grey.shade800,
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            message['showTime'] =
+                                !(message['showTime'] ?? false);
+                          });
+                        },
+                        child: isUser
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        vertical: 4.0),
+                                    padding: const EdgeInsets.all(12.0),
+                                    decoration: BoxDecoration(
+                                      color: userBubbleColor,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: Text(
+                                      message['message']!,
+                                      style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 15,
+                                          color: Colors.black),
                                     ),
                                   ),
-                                  child:
-                                      Text(option, textAlign: TextAlign.center),
-                                );
-                              }
-                            }).toList(),
-                          );
-                        }
-                      } else if (message['type'] == 'subCategory') {
-                        final isActive = message['active'] == true;
-                        final options =
-                            (message['options'] as List).cast<String>();
-                        if (isActive) {
-                          optionsWidget = Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: options.map((option) {
-                              return OutlinedButton(
-                                onPressed: () {
-                                  _handleIssueSelection(option);
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(
-                                    color: Colors.grey.shade800,
+                                  if (showTime)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 4.0, top: 2.0),
+                                      child: Text(
+                                        _formatTimestamp(message['time']),
+                                        style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 12,
+                                            color: Colors.black),
+                                      ),
+                                    ),
+                                  if (message.containsKey('options'))
+                                    _buildOptionsWidget(message),
+                                ],
+                              )
+                            : Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: Colors.white,
+                                    backgroundImage: AssetImage(
+                                        'assets/images/copartner-noname.png'),
                                   ),
-                                ),
-                                child:
-                                    Text(option, textAlign: TextAlign.center),
-                              );
-                            }).toList(),
-                          );
-                        } else {
-                          final selectedOption =
-                              message['selectedOption'] ?? "";
-                          optionsWidget = Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: options.map((option) {
-                              if (option == selectedOption) {
-                                return ElevatedButton(
-                                  onPressed: null,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2F3296),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child:
-                                      Text(option, textAlign: TextAlign.center),
-                                );
-                              } else {
-                                return OutlinedButton(
-                                  onPressed: null,
-                                  style: OutlinedButton.styleFrom(
-                                    side: BorderSide(
-                                      color: Colors.grey.shade800,
+                                  const SizedBox(width: 10.0),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical: 4.0),
+                                          padding: const EdgeInsets.all(12.0),
+                                          decoration: BoxDecoration(
+                                            color: botBubbleColor,
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                          child: Text(
+                                            message['message']!,
+                                            style: const TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 15,
+                                                color: Colors.black),
+                                          ),
+                                        ),
+                                        if (showTime)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 4.0, top: 2.0),
+                                            child: Text(
+                                              _formatTimestamp(message['time']),
+                                              style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 12,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                        if (message.containsKey('options'))
+                                          _buildOptionsWidget(message),
+                                      ],
                                     ),
                                   ),
-                                  child:
-                                      Text(option, textAlign: TextAlign.center),
-                                );
-                              }
-                            }).toList(),
-                          );
-                        }
-                      } else {
-                        final options =
-                            (message['options'] as List).cast<String>();
-                        optionsWidget = Wrap(
-                          spacing: 8.0,
-                          runSpacing: 8.0,
-                          children: options.map((option) {
-                            return ElevatedButton(
-                              onPressed: () {
-                                if (faqCategories.containsKey(option)) {
-                                  _handleCategorySelection(option);
-                                } else if (getSolutions(context)
-                                    .containsKey(option)) {
-                                  _handleIssueSelection(option);
-                                } else {
-                                  _handleFeedback(option);
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue.shade50,
-                                foregroundColor: Colors.black,
+                                ],
                               ),
-                              child: Text(option, textAlign: TextAlign.center),
-                            );
-                          }).toList(),
-                        );
-                      }
-                    }
-                    return Column(
-                      crossAxisAlignment: isUser
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        messageWidget,
-                        timestampWidget,
-                        if (optionsWidget != null) optionsWidget,
-                      ],
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _textController,
-                decoration: InputDecoration(
-                  hintText: "Type a message...",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      Icons.send,
-                      color: Theme.of(context).iconTheme.color,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _textController,
+                  style: const TextStyle(fontFamily: "Roboto"),
+                  decoration: InputDecoration(
+                    hintText: "Type a message...",
+                    hintStyle: const TextStyle(fontFamily: "Roboto"),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
-                    onPressed: _sendMessage,
+                    suffixIcon: Container(
+                      margin: const EdgeInsets.all(4.0),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF2F3296),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.send, color: Colors.white),
+                        onPressed: _sendMessage,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  // Extracted widget for building options.
+  Widget _buildOptionsWidget(Map<String, dynamic> message) {
+    Widget optionsWidget;
+    if (message['type'] == 'category') {
+      final bool isActive = message['active'] == true;
+      final List<String> options =
+          (message['options'] as List).cast<String>();
+      if (isActive) {
+        optionsWidget = Wrap(
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: options.map((option) {
+            return OutlinedButton(
+              onPressed: () {
+                _handleCategorySelection(option);
+              },
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              child: Text(option,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 15,
+                      color: Colors.black)),
+            );
+          }).toList(),
+        );
+      } else {
+        final selectedOption = message['selectedOption'] ?? "";
+        optionsWidget = Wrap(
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: options.map((option) {
+            if (option == selectedOption) {
+              return ElevatedButton(
+                onPressed: null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2F3296),
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(option,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600)),
+              );
+            } else {
+              return OutlinedButton(
+                onPressed: null,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                child: Text(option,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontFamily: "Roboto", fontSize: 15)),
+              );
+            }
+          }).toList(),
+        );
+      }
+    } else if (message['type'] == 'subCategory') {
+      final bool isActive = message['active'] == true;
+      final List<String> options =
+          (message['options'] as List).cast<String>();
+      if (isActive) {
+        optionsWidget = Wrap(
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: options.map((option) {
+            return OutlinedButton(
+              onPressed: () {
+                _handleIssueSelection(option);
+              },
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              child: Text(option,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 15,
+                      color: Colors.black)),
+            );
+          }).toList(),
+        );
+      } else {
+        final selectedOption = message['selectedOption'] ?? "";
+        optionsWidget = Wrap(
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: options.map((option) {
+            if (option == selectedOption) {
+              return ElevatedButton(
+                onPressed: null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2F3296),
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(option,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600)),
+              );
+            } else {
+              return OutlinedButton(
+                onPressed: null,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                child: Text(option,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontFamily: "Roboto", fontSize: 15)),
+              );
+            }
+          }).toList(),
+        );
+      }
+    } else if (message['type'] == 'feedback') {
+      final bool isActive = message['active'] == true;
+      final List<String> options =
+          (message['options'] as List).cast<String>();
+      if (isActive) {
+        optionsWidget = Wrap(
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: options.map((option) {
+            return OutlinedButton(
+              onPressed: () {
+                _handleFeedback(option);
+              },
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              child: Text(option,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontFamily: "Roboto", fontSize: 15, color: Colors.black)),
+            );
+          }).toList(),
+        );
+      } else {
+        final selectedOption = message['selectedOption'] ?? "";
+        optionsWidget = Wrap(
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: options.map((option) {
+            if (option == selectedOption) {
+              return ElevatedButton(
+                onPressed: null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(option,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600)),
+              );
+            } else {
+              return OutlinedButton(
+                onPressed: null,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                child: Text(option,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontFamily: "Roboto", fontSize: 15)),
+              );
+            }
+          }).toList(),
+        );
+      }
+    } else {
+      final List<String> options =
+          (message['options'] as List).cast<String>();
+      optionsWidget = Wrap(
+        spacing: 8.0,
+        runSpacing: 8.0,
+        children: options.map((option) {
+          return ElevatedButton(
+            onPressed: () {
+              if (faqCategories.containsKey(option)) {
+                _handleCategorySelection(option);
+              } else if (getSolutions(context).containsKey(option)) {
+                _handleIssueSelection(option);
+              } else {
+                _handleFeedback(option);
+              }
+            },
+            style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  color: Colors.grey.shade800,
+                ),
+                backgroundColor: Colors.white),
+            child: Text(option,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontFamily: "Roboto", fontSize: 15)),
+          );
+        }).toList(),
+      );
+    }
+    return optionsWidget;
   }
 }

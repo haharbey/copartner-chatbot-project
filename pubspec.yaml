@@ -37,6 +37,14 @@ flutter:
     - assets/images/welcome.gif
 
   fonts:
+    - family: Nunito Sans
+      fonts:
+        - asset: assets/fonts/NunitoSans-Regular.ttf
+    
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+
     - family: Alumni Sans
       fonts:
         - asset: assets/fonts/AlumniSans-Regular.ttf
