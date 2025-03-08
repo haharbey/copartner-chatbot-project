@@ -82,9 +82,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
     // Even if the user hasn't chosen a language, default to English texts.
     final bool useEnglish = languageProvider.isEnglish;
 
-    final title = useEnglish
-        ? "Welcome"
-        : "Maligayang Pagdating";
+    final title = useEnglish ? "Welcomeeee" : "Maligayang Pagdating";
     final description = useEnglish
         ? "Your reliable companion for answering all of your concerns. Let's get you started!"
         : "Ang iyong mapagkakatiwalaang kasama para sagutin ang lahat ng iyong mga alalahanin. Simulan na natin!";
@@ -138,11 +136,11 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
     // Use both isEnglish and hasSelectedLanguage to decide styling.
     final bool hasSelected = languageProvider.hasSelectedLanguage;
     // For translating texts on this slide, default to English if not selected.
-    final bool useEnglishForText = hasSelected ? languageProvider.isEnglish : true;
+    final bool useEnglishForText =
+        hasSelected ? languageProvider.isEnglish : true;
 
-    final title = useEnglishForText
-        ? "Select Your Language"
-        : "Piliin ang Iyong Wika";
+    final title =
+        useEnglishForText ? "Select Your Language" : "Piliin ang Iyong Wika";
     final description = useEnglishForText
         ? "Choose your language below."
         : "Piliin ang iyong wika sa ibaba.";
@@ -243,7 +241,8 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                             const Positioned(
                               right: 0,
                               top: 0,
-                              child: Icon(Icons.check_circle, color: Colors.green, size: 24),
+                              child: Icon(Icons.check_circle,
+                                  color: Colors.green, size: 24),
                             ),
                         ],
                       ),
@@ -310,7 +309,8 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                             const Positioned(
                               right: 0,
                               top: 0,
-                              child: Icon(Icons.check_circle, color: Colors.green, size: 24),
+                              child: Icon(Icons.check_circle,
+                                  color: Colors.green, size: 24),
                             ),
                         ],
                       ),

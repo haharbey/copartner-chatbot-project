@@ -4,6 +4,7 @@ import 'package:copartner/modules/home/home_screen.dart';
 import 'package:copartner/modules/language_settings/language_settings_screen.dart';
 import 'package:copartner/modules/notification/notification_screen.dart';
 import 'package:copartner/modules/appearance/appearance_settings_screen.dart';
+import 'package:copartner/modules/faqs/faq_screen.dart'; // <-- Import the FAQ screen
 import 'package:copartner/services/language_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -22,7 +23,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => HomeScreen(initialIndex: index)),
+          builder: (context) => HomeScreen(initialIndex: index),
+        ),
       );
     } else {
       setState(() {
@@ -35,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final isEnglish = Provider.of<LanguageProvider>(context).isEnglish;
 
-    // Localized texts for settings:
+    // Localized texts for settings
     final settingsTitle = isEnglish ? "Settings" : "Mga Setting";
     final notificationText = isEnglish ? "Notification" : "Notipikasyon";
     final languageText = isEnglish ? "Language" : "Wika";
@@ -78,7 +80,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const NotificationScreen()),
               );
             },
           ),
@@ -108,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // 1. NOTIFICATION with an on/off switch
             ListTile(
               leading: const Icon(Icons.notifications),
@@ -184,7 +187,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
-                // TODO: Implement FAQs navigation
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FAQScreen(),
+                  ),
+                );
               },
             ),
             const Spacer(),
@@ -205,7 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: Colors.white,
                     fontFamily: 'Alumni Sans',
                     fontSize: 20,
-                    fontWeight: FontWeight.bold
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

@@ -6,13 +6,19 @@ plugins {
 }
 
 android {
-    namespace = "com.example.copartner"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // For AGP 8.0 or newer, you can keep 'namespace'. For older versions, remove it.
+    namespace "com.example.copartner"
+    
+    // Use the older DSL "compileSdkVersion" if you have trouble with "compileSdk = ...":
+    compileSdkVersion flutter.compileSdkVersion
+
+    // Explicitly set the exact NDK version folder name you have installed.
+    // Example: if your folder is "C:\Users\Cynthia\AppData\Local\Android\sdk\ndk\29.0.13113456-rc1"
+    ndkVersion "29.0.13113456-rc1"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
@@ -20,25 +26,21 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.copartner"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        applicationId "com.example.copartner"
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutter.versionCode
+        versionName flutter.versionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            // Use your own signing config in production
+            signingConfig signingConfigs.debug
         }
     }
 }
 
 flutter {
-    source = "../.."
+    source "../.."
 }

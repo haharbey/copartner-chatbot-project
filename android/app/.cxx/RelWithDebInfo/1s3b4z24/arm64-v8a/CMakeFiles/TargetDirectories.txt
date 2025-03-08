@@ -1,0 +1,2 @@
+C:/Users/Cynthia/Documents/GitHub/copartner-chatbot-project/android/app/.cxx/RelWithDebInfo/1s3b4z24/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/Cynthia/Documents/GitHub/copartner-chatbot-project/android/app/.cxx/RelWithDebInfo/1s3b4z24/arm64-v8a/CMakeFiles/rebuild_cache.dir
